@@ -1,49 +1,22 @@
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var qs = require('querystring');
+var http = require("http");
+var fs = require("fs");
+var url = require("url");
+var qs = require("querystring");
 
-function templateList(filelist) {
-  var list = '<ul>';
-  var i = 0;
-  while (i < filelist.length) {
-    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-    i = i + 1;
-  }
-  list = list + '</ul>';
-  return list;
-}
-
-function templateHTML(title, list, body, controll) {
-  return `
-  <!doctype html>
-  <html>
-  <head>
-    <title>WEB - ${title}</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <h1><a href="/">WEB</a></h1>
-    ${list}
-    ${controll}
-    ${body}
-  </body>
-  </html>
-  `;
-}
+var templateObject = require("./lib/tempate.js");
 
 var app = http.createServer(function (request, response) {
   var _url = request.url;
   var queryData = url.parse(_url, true).query;
   var pathname = url.parse(_url, true).pathname;
-  if (pathname === '/') {
+  if (pathname === "/") {
     if (queryData.id === undefined) {
-      fs.readdir('./data', (error, filelist) => {
-        var title = 'Welcome';
-        var data = 'Hello Node.js';
-        var list = templateList(filelist);
-        list = list + '</ul>';
-        var template = templateHTML(
+      fs.readdir("./data", (error, filelist) => {
+        var title = "Welcome";
+        var data = "Hello Node.js";
+        var list = templateObject.list(filelist);
+        list = list + "</ul>";
+        var template = templateObject.html(
           title,
           list,
           `<h2>${title}</h2>${data}`,
@@ -53,11 +26,11 @@ var app = http.createServer(function (request, response) {
         response.end(template);
       });
     } else {
-      fs.readFile(`data/${queryData.id}`, 'utf8', (err, data) => {
-        fs.readdir('./data', (error, filelist) => {
-          var list = templateList(filelist);
+      fs.readFile(`data/${queryData.id}`, "utf8", (err, data) => {
+        fs.readdir("./data", (error, filelist) => {
+          var list = templateObject.list(filelist);
           var title = queryData.id;
-          var template = templateHTML(
+          var template = templateObject.html(
             title,
             list,
             `<h2>${title}</h2>${data}`,
@@ -70,12 +43,12 @@ var app = http.createServer(function (request, response) {
         });
       });
     }
-  } else if (pathname === '/create') {
-    fs.readdir('./data', (error, filelist) => {
-      var title = 'Web-creat';
-      var list = templateList(filelist);
-      list = list + '</ul>';
-      var template = templateHTML(
+  } else if (pathname === "/create") {
+    fs.readdir("./data", (error, filelist) => {
+      var title = "Web-creat";
+      var list = templateObject.list(filelist);
+      list = list + "</ul>";
+      var template = templateObject.html(
         title,
         list,
         `<form action="http://localhost:3000/create_process" method="post">
@@ -88,31 +61,31 @@ var app = http.createServer(function (request, response) {
       </p>
     </form>
     `,
-        ''
+        ""
       );
       response.writeHead(200);
       response.end(template);
     });
-  } else if (pathname === '/create_process') {
-    var body = '';
-    request.on('data', function (data) {
+  } else if (pathname === "/create_process") {
+    var body = "";
+    request.on("data", function (data) {
       body = body + data;
     });
-    request.on('end', function () {
+    request.on("end", function () {
       var post = qs.parse(body);
       var title = post.title;
       var description = post.description;
-      fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
+      fs.writeFile(`data/${title}`, description, "utf8", function (err) {
         response.writeHead(302, { Location: `/?id${title}` });
         response.end();
       });
     });
-  } else if (pathname === '/update') {
-    fs.readFile(`data/${queryData.id}`, 'utf8', (err, data) => {
-      fs.readdir('./data', (error, filelist) => {
-        var list = templateList(filelist);
+  } else if (pathname === "/update") {
+    fs.readFile(`data/${queryData.id}`, "utf8", (err, data) => {
+      fs.readdir("./data", (error, filelist) => {
+        var list = templateObject.list(filelist);
         var title = queryData.id;
-        var template = templateHTML(
+        var template = templateObject.html(
           title,
           list,
           `<form action="/update_process" method="post">
@@ -131,30 +104,30 @@ var app = http.createServer(function (request, response) {
         response.end(template);
       });
     });
-  } else if (pathname === '/update_process') {
-    var body = '';
-    request.on('data', function (data) {
+  } else if (pathname === "/update_process") {
+    var body = "";
+    request.on("data", function (data) {
       body = body + data;
     });
-    request.on('end', function () {
+    request.on("end", function () {
       var post = qs.parse(body);
       var id = post.id;
       s;
       var title = post.title;
       var description = post.description;
       fs.rename(`data/${id}`, `data/${title}`, function (error) {
-        fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
+        fs.writeFile(`data/${title}`, description, "utf8", function (err) {
           response.writeHead(302, { Location: `/?id${title}` });
           response.end();
         });
       });
     });
-  } else if (pathname === '/delete_process') {
-    var body = '';
-    request.on('data', function (data) {
+  } else if (pathname === "/delete_process") {
+    var body = "";
+    request.on("data", function (data) {
       body = body + data;
     });
-    request.on('end', function () {
+    request.on("end", function () {
       var post = qs.parse(body);
       var id = post.id;
       console.log(id);
@@ -165,7 +138,7 @@ var app = http.createServer(function (request, response) {
     });
   } else {
     response.writeHead(404);
-    response.end('Not found:404');
+    response.end("Not found:404");
   }
 });
 

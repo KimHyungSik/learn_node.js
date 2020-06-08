@@ -1,11 +1,6 @@
-var fs = require('fs');
+var members = ["kim", "park", "choi"];
+console.log(members[1]);
 
-function A() {
-  console.log('a');
-}
+var roles = { programmer: "kim", designer: "park", manager: "choi" };
 
-function c(d) {
-  d();
-}
-
-c(A);
+console.log(roles["programmer"]);
